@@ -36,6 +36,8 @@ public class EnemiesReceiveDamage : MonoBehaviour {
     public bool dead = false;
     bool nowDead = true;
 
+    public int expGiven = 0;
+
 
     //** SOUNDS **
     [HideInInspector]
@@ -122,6 +124,7 @@ public class EnemiesReceiveDamage : MonoBehaviour {
         {
             dead = true;
             nowDead = false;
+            giveEXP();
             //Destroy(gameObject);
         }
 
@@ -134,7 +137,6 @@ public class EnemiesReceiveDamage : MonoBehaviour {
             rb.drag = 10000;
             rb.mass = 50;
         }
-
     }
 
     void OnTriggerStay2D(Collider2D col)
@@ -331,5 +333,12 @@ public class EnemiesReceiveDamage : MonoBehaviour {
         //"myHealth" needs to be set between the values of 0 and 1: 1 being 100%.
         healthBar.transform.localScale = new Vector3(myHealth, healthBar.transform.localScale.y, healthBar.transform.localScale.z);
         healthBar.color = Color.Lerp(endColor, startColor, calculator);
+    }
+
+    public void giveEXP()
+    {
+        _player.GetComponent<ExpSystemPlayer>().CalcExp(expGiven);
+        this.gameObject.GetComponent<EnemiesReceiveDamage>().dead = false;
+        this.gameObject.SetActive(false);
     }
 }

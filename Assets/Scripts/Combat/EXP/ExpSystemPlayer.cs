@@ -9,7 +9,7 @@ public class ExpSystemPlayer : MonoBehaviour
     [HideInInspector]
     public int playerLevel = 1;
     [HideInInspector]
-    public float maxExp = 0f;
+    public float maxExp = 100f;
 
     public GameObject _player;
 
@@ -17,24 +17,20 @@ public class ExpSystemPlayer : MonoBehaviour
     void Start()
     {
         maxExp = 100 * playerLevel;
+        _player = this.gameObject;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        maxExp = 100 * playerLevel;
-    }
 	public void CalcExp(int enemyLvl)
 	{
 		exp += (enemyLvl * 10);
-		
-		maxExp = 100 * playerLevel;
 		
 		if (exp >= maxExp)
 		{
 			playerLevel++;
 			exp = exp - maxExp;
 			_player.GetComponent<CombatScript>().normalDamage++;
-		}
+
+            maxExp = 100 * playerLevel;
+        }
 	}
 }

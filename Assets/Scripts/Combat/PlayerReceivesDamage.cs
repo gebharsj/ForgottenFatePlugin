@@ -96,7 +96,7 @@ public class PlayerReceivesDamage : MonoBehaviour
                     if (damageTaken > _player.GetComponent<CombatScript>().armor + 1)
                         damageTaken = damageTaken - _player.GetComponent<CombatScript>().armor;
                     else
-                        damageTaken = 2;
+                        damageTaken = 0;
                     damageTaken = -damageTaken;
                     criticalHit = Random.Range(0, 1.0f);
                     //shield reflects damage

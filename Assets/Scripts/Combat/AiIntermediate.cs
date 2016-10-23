@@ -7,23 +7,16 @@ public class AiIntermediate : MonoBehaviour {
     public float targetDistance;
     public float attackDistance;
 
-    public float sprintDistance;
-
-    public float normalMovementSpeed;
-    public float sprintMovementSpeed;
-    [HideInInspector]
-    public float slowMovementSpeed;
-    [HideInInspector]
-    public float fastMovementSpeed;
+    public float movementSpeed;
 
     public int random = 0;
     public float attackTimer;
     private float permentTimer;
 
-    //private int		fleeNumber;
-    //public 	int		fleePercent;
-    public float fleeHealthPercent;
+    public int fleeHealthPercent;
     private float fleeHealth;
+    public int fleePercent;
+    private int fleeChance;
 
     private float objectHeight;
     private float objectWidth;
@@ -49,7 +42,7 @@ public class AiIntermediate : MonoBehaviour {
     private Vector3 vectorDestination;
 
     [HideInInspector]
-    public Collider2D _collider;
+    private Collider2D _collider;
     public Collider2D _ownCollider;
 
     private RaycastHit2D hit;
@@ -71,12 +64,19 @@ public class AiIntermediate : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
-        fastMovementSpeed = sprintMovementSpeed;
-        slowMovementSpeed = normalMovementSpeed;
-
         permentTimer = attackTimer;
 
-        fleeHealth = this.gameObject.GetComponent<EnemiesReceiveDamage>().maxHp * fleeHealthPercent / 100;
+        _player = GameObject.FindGameObjectWithTag("Player");
+
+        targetPlayer = _player.transform;
+
+        targetRayCast = _player.transform.FindChild("Raycast");
+
+        _ownCollider = this.GetComponent<BoxCollider2D>();
+
+        fleeHealth = this.gameObject.GetComponent<EnemiesReceiveDamage>().maxHp * (fleeHealthPercent / 100);
+
+        fleeChance = (int) 1 / (fleePercent / 100);
     }
 
     // Update is called once per frame
@@ -84,19 +84,10 @@ public class AiIntermediate : MonoBehaviour {
     {
         if (attackTimer > 0)
         {
-            //print (attackTimer + " : AttackTimer");
             attackTimer -= 1 * Time.deltaTime;
         }
 
         targetDistance = Vector3.Distance(targetPlayer.position, transform.position);
-
-        //-------Speed Changes Based Upon Distance------------
-        if (targetDistance > sprintDistance)
-        {
-            normalMovementSpeed = fastMovementSpeed;
-        }
-        else
-            normalMovementSpeed = slowMovementSpeed;
 
         //--------If Hit, always Chances------------
         if (noDamage)
@@ -117,7 +108,7 @@ public class AiIntermediate : MonoBehaviour {
 				random = 0;
 				if (this.gameObject.GetComponent<EnemiesReceiveDamage> ().hp < fleeHealth) 
 				{
-					random = Random.Range (1, 5);//fleeNumber);
+					random = Random.Range (1, fleeChance);//fleeNumber);
 
 					if (random == 1)
 					{
@@ -129,7 +120,7 @@ public class AiIntermediate : MonoBehaviour {
 				}
 			} 
 			else
-				MovingPhase (targetPlayer, -fastMovementSpeed);
+				MovingPhase (targetPlayer, -movementSpeed);
 		}
 
         //------Moves Towards the Player-------------
@@ -138,19 +129,19 @@ public class AiIntermediate : MonoBehaviour {
             if (playerTouch == false && runAway == false && objectTouch == false && enemyTouch == false)
             {
                 //print("PlayerNav");
-                MovingPhase(targetPlayer, normalMovementSpeed);
+                MovingPhase(targetPlayer, movementSpeed);
             }
         }
         //-------Enemy Moves Around Obstacle-----------
         if (objectNav)
         {
             //print("ObjectNav");
-            MovingPhase(targetObject, normalMovementSpeed + 2);
+            MovingPhase(targetObject, movementSpeed + 2);
         }
         else if (enemyNav)
         {
             //print("EnemyNav");
-            MovingPhase(targetObject, normalMovementSpeed + 2);
+            MovingPhase(targetObject, movementSpeed + 2);
         }
 
         if (playerTouch) // prevents enemy from pushing the enemy touching the player
