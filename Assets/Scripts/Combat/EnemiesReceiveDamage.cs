@@ -58,7 +58,6 @@ public class EnemiesReceiveDamage : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
-
         rb = GetComponent<Rigidbody2D>();
         _player = GameObject.FindGameObjectWithTag("Player");
         hPBar = transform.FindChild("HealthBar").gameObject;

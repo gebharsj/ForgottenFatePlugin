@@ -4,13 +4,14 @@ using System.Collections;
 
 public class CombatScript : MonoBehaviour 
 {
-    public GameObject self;
+    GameObject self;
     public MouseScript _mouse;
-    public Transform playerPOS;
-    public GameObject up;
-    public GameObject down;
-    public GameObject left;
-    public GameObject right;
+    Transform playerPOS;
+    GameObject up;
+    GameObject down;
+    GameObject left;
+    GameObject right;
+    public int maxHealth = 65;
     public int normalDamage = 7;
     public int rangeDamage = 3;
     [HideInInspector]
@@ -23,8 +24,7 @@ public class CombatScript : MonoBehaviour
     public int armor;
     public float dexterity; // chance of hitting
     public float meleeRange = 0.8f;
-    public float meleeAdjustment = 0.5f;
-    public int maxHealth = 65;
+    private float meleeAdjustment = 0.5f;
     public int health;
     [Range(0.03f, 0.08f)]
     public float criticalChance;
@@ -34,18 +34,18 @@ public class CombatScript : MonoBehaviour
     [HideInInspector]
     public float chargeDistance;
     public bool melee = true;
-    public Rigidbody2D projectile;
-    public Rigidbody2D flamePrefab;
+    Rigidbody2D projectile;
+    Rigidbody2D flamePrefab;
     [HideInInspector]
     public Transform target;
-    public GameObject smokeChild;
+    GameObject smokeChild;
     [HideInInspector]
     public float chargeShot;
-    public Color32 startColor;
-    public Color32 endColor;
-    public Image energyBar;
-    public GameObject energy;
-    public Transform restorationPrefab;
+    Color32 startColor;
+    Color32 endColor;
+    Image energyBar;
+    GameObject energy;
+    Transform restorationPrefab;
     //***calculators**
     float calculator;
     float calculator2;
@@ -53,7 +53,7 @@ public class CombatScript : MonoBehaviour
     float calculator4;
     //[HideInInspector]
     public int spells = 0;
-    public GameObject shieldChild;
+    GameObject shieldChild;
     public int shield;
     public int healthRestore = 25;
 
@@ -69,10 +69,10 @@ public class CombatScript : MonoBehaviour
 
 
     //**image cooldowns**
-    public Image CoolDownImageShield;
-    public Image CoolDownImageRestore;
-    public Image CoolDownImageFire;
-    public Image CoolDownImageLight;
+    Image CoolDownImageShield;
+    Image CoolDownImageRestore;
+    Image CoolDownImageFire;
+    Image CoolDownImageLight;
 
 
     [HideInInspector]
@@ -108,13 +108,51 @@ public class CombatScript : MonoBehaviour
 
     void Awake()
     {
-
+        self = this.gameObject;
+        playerPOS = self.transform;
         health = maxHealth;
     }
 
     // Use this for initialization
     void Start()
     {
+        Transform melee = transform.GetChild(0);
+        up = melee.GetChild(0).gameObject;
+        down = melee.GetChild(1).gameObject;
+        left = melee.GetChild(2).gameObject;
+        right = melee.GetChild(3).gameObject;
+
+        smokeChild = GameObject.FindGameObjectWithTag("Smoke");
+
+        //============Grabs all the Visual Componenets from Combat Visuals========
+        CombatVisuals visuals = this.GetComponent<CombatVisuals>();
+
+        projectile = visuals.projectile;
+        flamePrefab = visuals.flamePrefab;
+        startColor = visuals.startColor;
+        endColor = visuals.endColor;
+        energyBar = visuals.energyBar;
+        energy = visuals.energy;
+        restorationPrefab = visuals.restorationPrefab;
+        shieldChild = visuals.shieldChild;
+
+        CoolDownImageShield = visuals.CoolDownImageShield;
+        CoolDownImageRestore = visuals.CoolDownImageRestore;
+        CoolDownImageFire = visuals.CoolDownImageFire;
+        CoolDownImageLight = visuals.CoolDownImageLight;
+
+
+        //setting the scale of objects to range of melee weapon
+        up.transform.localScale = new Vector3(0, meleeRange, 0);
+        up.transform.localPosition = new Vector3(0, meleeAdjustment, 0);
+        down.transform.localScale = new Vector3(0, -meleeRange, 0);
+        down.transform.localPosition = new Vector3(0, -meleeAdjustment, 0);
+        left.transform.localScale = new Vector3(-meleeRange, 0, 0);
+        left.transform.localPosition = new Vector3(-meleeAdjustment, 0, 0);
+        right.transform.localScale = new Vector3(meleeRange, 0, 0);
+        right.transform.localPosition = new Vector3(meleeAdjustment, 0, 0);
+
+        //=================All of Chris' Dumb Audio Stuff=====================
         au_bow1 = gameObject.AddComponent<AudioSource>();
         AudioClip bow1;
 
@@ -166,31 +204,15 @@ public class CombatScript : MonoBehaviour
 
         light = (AudioClip)Resources.Load("Audio/Spells/magicLightningSoundEffect", typeof(AudioClip));
         au_light.clip = light;
-
-
-
-
-
     }
 
     // Update is called once per frame
     void Update()
     {
-
         //switching from melee to range
         if (Input.GetKeyUp(KeyCode.Q))
         {
-            if (melee == false)
-            {
-                melee = true;
-                //print ("true");
-            }
-            //switching from range to melee
-            else
-            {
-                melee = false;
-                //print ("false");
-            }
+            melee = !melee;
         }
 
         if (health <= 0)
@@ -203,19 +225,6 @@ public class CombatScript : MonoBehaviour
         }
         if (health > maxHealth)
             health = maxHealth;
-
-        //setting the scale of objects to range of melee weapon
-        up.transform.localScale = new Vector3(0, meleeRange, 0);
-        up.transform.localPosition = new Vector3(0, meleeAdjustment, 0);
-        down.transform.localScale = new Vector3(0, -meleeRange, 0);
-        down.transform.localPosition = new Vector3(0, -meleeAdjustment, 0);
-        left.transform.localScale = new Vector3(-meleeRange, 0, 0);
-        left.transform.localPosition = new Vector3(-meleeAdjustment, 0, 0);
-        right.transform.localScale = new Vector3(meleeRange, 0, 0);
-        right.transform.localPosition = new Vector3(meleeAdjustment, 0, 0);
-
-        if (criticalChance > 0.08f)
-            criticalChance = 0.08f;
 
         if (Input.GetMouseButtonDown(0) && attackRate == 0) //left click
         {
@@ -338,15 +347,6 @@ public class CombatScript : MonoBehaviour
             self.GetComponent<PlayerMovement>().moveSpeed = 0;
             //self.GetComponent<PlayerMovement>().moveY = 0;
         }
-
-        if (attackRate < 0)
-            attackRate = 0;
-        if (attackSpeed > 50)
-            attackSpeed = 50;
-
-
-        if (defense < 1)
-            defense = 1;
 
         //charge recovery
         if (chargeDistance > 1)

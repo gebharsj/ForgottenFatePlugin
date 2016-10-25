@@ -13,10 +13,10 @@ public class AiIntermediate : MonoBehaviour {
     public float attackTimer;
     private float permentTimer;
 
-    public int fleeHealthPercent;
+    public int fleeHealthPercent = 20;
     private float fleeHealth;
     public int fleePercent;
-    private int fleeChance;
+    private int fleeChance = 0;
 
     private float objectHeight;
     private float objectWidth;
@@ -76,7 +76,8 @@ public class AiIntermediate : MonoBehaviour {
 
         fleeHealth = this.gameObject.GetComponent<EnemiesReceiveDamage>().maxHp * (fleeHealthPercent / 100);
 
-        fleeChance = (int) 1 / (fleePercent / 100);
+        if (fleePercent != 0)
+            fleeChance = (int) 1 / (fleePercent / 100);
     }
 
     // Update is called once per frame

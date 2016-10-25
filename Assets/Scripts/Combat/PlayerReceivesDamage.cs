@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class PlayerReceivesDamage : MonoBehaviour
 {
     public GameObject CBTPrefab;
-    public GameObject _player;
+    GameObject _player;
 
 
     [HideInInspector]
@@ -32,6 +32,8 @@ public class PlayerReceivesDamage : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        _player = this.gameObject;
+
         au_miss1 = gameObject.AddComponent<AudioSource>();
         AudioClip miss1;
         // Resources must be in any folder named Resources.  load as type and cast as type because Unity returns Object by default.
@@ -49,10 +51,6 @@ public class PlayerReceivesDamage : MonoBehaviour
         // Resources must be in any folder named Resources.  load as type and cast as type because Unity returns Object by default.
         swordhit = (AudioClip)Resources.Load("Audio/Combat Sounds/weaponSwordHitSoundEffect", typeof(AudioClip));
         au_swordhit.clip = swordhit;
-
-    }
-    void Update()
-    {
 
     }
 

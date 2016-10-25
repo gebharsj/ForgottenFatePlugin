@@ -2,9 +2,8 @@
 using System.Collections;
 
 public class PlayerMovement : MonoBehaviour {
-	//NOTE: If the public float, speed, is too high, the player may experience some serious turbulance! Player may 
-	//fly through solid objects or other objects not otherwise meant to be passable.
-    public Rigidbody2D player;
+
+    Rigidbody2D player;
     public float speed = 200.0f;
     public float sprint = 2;
     [HideInInspector]
@@ -12,7 +11,8 @@ public class PlayerMovement : MonoBehaviour {
     public float stamina = 5;
     public int maxStamina = 5;
     public float staminaRecoveryRate = 0.3f;
-    private float staminaRecharge = 5.0f;
+    public int staminRechargeDelay = 5;
+    private float staminaRechargeCnt;
     [HideInInspector]
     public float moveSpeed;
 
@@ -36,7 +36,11 @@ public class PlayerMovement : MonoBehaviour {
     //const int LEFT_MOUSE_BUTTON = 0;
     void start()
     {
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<Rigidbody2D>();
+
+        staminaRechargeCnt = staminRechargeDelay;
         stamina = maxStamina;
+
         if (isSprinting == false)
         {
             moveSpeed = speed;
@@ -49,7 +53,6 @@ public class PlayerMovement : MonoBehaviour {
 
     void Update()
     {
-
         if (Input.GetKey(PlayerPrefs.GetString("MoveRight")))
         {
             transform.Translate(Vector3.right * moveSpeed * Time.deltaTime);
@@ -94,46 +97,30 @@ public class PlayerMovement : MonoBehaviour {
             isSprinting = false;
 
 
-        //player.velocity = new Vector3(moveX, moveY, 0);        //use : transform.Translate(moveX, moveY, 0f); if we decide to go back to 3D
-
-
         // Only when left mouse button is not clicked, will the WSAD controls work.) 
         if (isSprinting == false)
         {
             moveSpeed = speed;
-            //WSAD control
-            //moveX = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
-            //moveY = Input.GetAxis("Vertical") * speed * Time.deltaTime;
-
         }
         else
         {
             moveSpeed = speed * sprint;
             stamina -= 1 * Time.deltaTime;
-            staminaRecharge = 0;
-            //sprinting and stamina drain
-            //moveX = Input.GetAxis("Horizontal") * speed * sprint * Time.deltaTime;
-            //moveY = Input.GetAxis("Vertical") * speed * sprint * Time.deltaTime;
-            //if (moveX != 0 || moveY != 0)
-            //{
-            //    stamina -= 1 * Time.deltaTime;
-            //    staminaRecharge = 0;
-            //}
-
+            staminaRechargeCnt = 0;
         }
 
         //stamina must recharge before it can recover
-        if (staminaRecharge < 5)
+        if (staminaRechargeCnt < staminRechargeDelay)
         {
-            staminaRecharge += 1 * Time.deltaTime;
+            staminaRechargeCnt += 1 * Time.deltaTime;
 
             //if staminaRecharge should happen to go above 5
-            if (staminaRecharge > 5)
-                staminaRecharge = 5;
+            if (staminaRechargeCnt > staminRechargeDelay)
+                staminaRechargeCnt = staminRechargeDelay;
         }
 
         //stamina recovery
-        if (isSprinting == false && stamina < maxStamina && staminaRecharge == 5)
+        if (isSprinting == false && stamina < maxStamina && staminaRechargeCnt == 5)
         {
             stamina += 1 * Time.deltaTime * staminaRecoveryRate;
 

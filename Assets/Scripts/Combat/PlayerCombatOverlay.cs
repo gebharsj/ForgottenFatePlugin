@@ -64,12 +64,7 @@ public class PlayerCombatOverlay : MonoBehaviour {
             SetDrain(calculatorDrain);
         }
 
-
-
-
-
         //-------------Calculate the Ratio Between Current and Max-----------------------------------------------
-        //print (_player.GetComponent<CombatScript> ().maxExp + " Max Exp");
         calculatorHealth = _player.GetComponent<CombatScript>().health / _player.GetComponent<CombatScript>().maxHealth;
         calculatorStamina = _player.GetComponent<PlayerMovement>().stamina / _player.GetComponent<PlayerMovement>().maxStamina;
         calculatorExp = _player.GetComponent<ExpSystemPlayer>().exp / _player.GetComponent<ExpSystemPlayer>().maxExp;
@@ -77,9 +72,6 @@ public class PlayerCombatOverlay : MonoBehaviour {
         SetHealth(calculatorHealth);
         SetStamina(calculatorStamina);
         SetExp(calculatorExp);
-
-        //print (calculatorExp + " Calc. EXP");
-        //print (calculatorHealth + " Calc. Health");
 
         //--------------Convert Numbers to String-----------------
         placeHolder = _player.GetComponent<CombatScript>().health;

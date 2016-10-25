@@ -4,13 +4,13 @@ using UnityEngine.UI;
 
 public class SkillSelector : MonoBehaviour {
 
-    public GameObject player;
+    GameObject player;
 	public GameObject whiteBox1, whiteBox2, whiteBox3, whiteBox4;
     public bool oneUnlocked, twoUnlocked, threeUnlocked, fourUnlocked = false;
 
     void Start()
     {
-        //StartCoroutine (Wait ());
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 
     void Update()
