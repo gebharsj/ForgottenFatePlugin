@@ -8,6 +8,8 @@ public class SkillSelector : MonoBehaviour {
 	public GameObject whiteBox1, whiteBox2, whiteBox3, whiteBox4;
     public bool oneUnlocked, twoUnlocked, threeUnlocked, fourUnlocked = false;
 
+    public AudioClip flame;
+
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -17,7 +19,7 @@ public class SkillSelector : MonoBehaviour {
     {
         if (Input.GetKeyUp("1") && oneUnlocked)
         {
-            player.GetComponent<CombatScript>().spells = 0;
+            player.GetComponent<CombatSpells>().projectileSpell(5, flame);
             whiteBox1.SetActive(true);
             whiteBox2.SetActive(false);
             whiteBox3.SetActive(false);

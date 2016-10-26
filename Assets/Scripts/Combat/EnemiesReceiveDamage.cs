@@ -107,7 +107,7 @@ public class EnemiesReceiveDamage : MonoBehaviour {
 
             if (burning <= 2.8f)
             {
-                hp -= (int) (_player.GetComponent<CombatScript>().fireDamage * 4 * Time.deltaTime);
+                //hp -= (int) (_player.GetComponent<CombatScript>().fireDamage * 4 * Time.deltaTime); ======================================
                 calculator = hp / maxHp;
                 SetHealth(calculator);
             }
@@ -156,7 +156,7 @@ public class EnemiesReceiveDamage : MonoBehaviour {
         {
             hPTimer = 3;
             hPBar.SetActive(true);
-            hp -=  (int) (_player.GetComponent<CombatScript>().fireDamage * Time.deltaTime);
+            //hp -=  (int) (_player.GetComponent<CombatScript>().fireDamage * Time.deltaTime); ============================================
             calculator = hp / maxHp;
             SetHealth(calculator);
             burning = 3;

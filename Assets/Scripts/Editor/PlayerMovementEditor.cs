@@ -26,7 +26,7 @@ public class PlayerMovementEditor : Editor {
     {
         serObj.Update();
 
-        speed.floatValue = EditorGUILayout.Slider(new GUIContent("Movement Speed", "The movement speed of the player"), speed.floatValue, 50f, 500f);
+        speed.floatValue = EditorGUILayout.Slider(new GUIContent("Movement Speed", "The movement speed of the player"), speed.floatValue, 10f, 100f);
 
         sprint.floatValue = EditorGUILayout.Slider(new GUIContent("Sprint Multiplier", "How much faster sprinting is"), sprint.floatValue, 1f, 10f);
 

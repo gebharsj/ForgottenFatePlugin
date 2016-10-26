@@ -7,17 +7,16 @@ public class CombatScript : MonoBehaviour
     GameObject self;
     public MouseScript _mouse;
     Transform playerPOS;
-    GameObject up;
-    GameObject down;
-    GameObject left;
-    GameObject right;
+    public GameObject up;
+    public GameObject down;
+    public GameObject left;
+    public GameObject right;
     public int maxHealth = 65;
     public int normalDamage = 7;
     public int rangeDamage = 3;
     [HideInInspector]
     public int playerDamage = 3;
     //[HideInInspector]
-    public float fireDamage = 0.02f;
     public int lightDamage = 200;
     public int attackSpeed = 5;
     public int defense;
@@ -35,7 +34,7 @@ public class CombatScript : MonoBehaviour
     public float chargeDistance;
     public bool melee = true;
     Rigidbody2D projectile;
-    Rigidbody2D flamePrefab;
+    
     [HideInInspector]
     public Transform target;
     GameObject smokeChild;
@@ -45,7 +44,7 @@ public class CombatScript : MonoBehaviour
     Color32 endColor;
     Image energyBar;
     GameObject energy;
-    Transform restorationPrefab;
+    
     //***calculators**
     float calculator;
     float calculator2;
@@ -53,26 +52,6 @@ public class CombatScript : MonoBehaviour
     float calculator4;
     //[HideInInspector]
     public int spells = 0;
-    GameObject shieldChild;
-    public int shield;
-    public int healthRestore = 25;
-
-    //**spellcooldowns
-    float shieldCoolDown;
-    float restoreCoolDown;
-    float fireCoolDown;
-    float lightCoolDown;
-    //**Spell Timers**
-    float shieldTimer;
-    float restoreTimer;
-    float fireTimer;
-
-
-    //**image cooldowns**
-    Image CoolDownImageShield;
-    Image CoolDownImageRestore;
-    Image CoolDownImageFire;
-    Image CoolDownImageLight;
 
 
     [HideInInspector]
@@ -128,19 +107,10 @@ public class CombatScript : MonoBehaviour
         CombatVisuals visuals = this.GetComponent<CombatVisuals>();
 
         projectile = visuals.projectile;
-        flamePrefab = visuals.flamePrefab;
         startColor = visuals.startColor;
         endColor = visuals.endColor;
         energyBar = visuals.energyBar;
         energy = visuals.energy;
-        restorationPrefab = visuals.restorationPrefab;
-        shieldChild = visuals.shieldChild;
-
-        CoolDownImageShield = visuals.CoolDownImageShield;
-        CoolDownImageRestore = visuals.CoolDownImageRestore;
-        CoolDownImageFire = visuals.CoolDownImageFire;
-        CoolDownImageLight = visuals.CoolDownImageLight;
-
 
         //setting the scale of objects to range of melee weapon
         up.transform.localScale = new Vector3(0, meleeRange, 0);
@@ -358,195 +328,6 @@ public class CombatScript : MonoBehaviour
             chargeDistance = 0;
         }
 
-
-        //*******MAGIC SPELLS***********
-
-        //casting fire  (Firestorm)
-        if (fireTimer > 0)
-            fireTimer -= 5 * Time.deltaTime;
-
-        if (fireTimer <= 0 && fireCoolDown > 0)
-        {
-            fireCoolDown -= 10 * Time.deltaTime;
-            calculator4 = fireCoolDown / 100;
-            CoolDownFire(calculator4);
-        }
-        if (fireCoolDown < 0)
-        {
-            fireCoolDown = 0;
-            calculator4 = fireCoolDown / 100;
-            CoolDownFire(calculator4);
-        }
-
-        if (fireTimer < 0)
-            fireTimer = 0;
-
-        if (!Input.GetMouseButton(1) && au_flame1.isPlaying)
-        {
-            au_flame1.Stop();
-            au_flame2.Play();
-        }
-
-        if (Input.GetMouseButton(1) && spells == 0 && fireCoolDown < 100)  //right click
-        {
-            if (fireCoolDown < 100)
-                fireCoolDown += 40 * Time.deltaTime;
-            calculator4 = fireCoolDown / 100;
-            CoolDownFire(calculator4);
-            fireTimer = 20;
-
-            //prevent player from moving
-            self.GetComponent<PlayerMovement>().moveSpeed = 0;
-            //self.GetComponent<PlayerMovement>().moveY = 0;
-
-            if (!target)
-                target = GameObject.FindWithTag("Mouse").transform;
-
-            Vector3 v3Pos;
-            float fAngle;
-
-            v3Pos = Camera.main.WorldToScreenPoint(target.transform.position);
-            v3Pos = Input.mousePosition - v3Pos;
-            fAngle = Mathf.Atan2(v3Pos.y, v3Pos.x) * Mathf.Rad2Deg;
-
-            Rigidbody2D clone;
-            clone = Instantiate(flamePrefab, transform.position, transform.rotation) as Rigidbody2D;
-
-            if (fAngle < 0.0f)
-                fAngle += 360.0f;
-
-            //playing the sound effect
-            if (!au_flame1.isPlaying)
-                au_flame1.Play();
-
-
-            //flame goes in the direction of the mouse
-
-
-            if (fAngle <= 135.0F && fAngle > 45.0F)
-            {
-                //print ("up");
-                clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
-                down.SetActive(false);
-                left.SetActive(false);
-                right.SetActive(false);
-                up.SetActive(true);
-            }
-
-            if (fAngle <= 45.0F || fAngle > 315.0F)
-            {
-                //print ("right");
-                clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
-                up.SetActive(false);
-                down.SetActive(false);
-                left.SetActive(false);
-                right.SetActive(true);
-            }
-
-            if (fAngle <= 225.0F && fAngle > 135.0F)
-            {
-                //print ("left");
-                clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
-                up.SetActive(false);
-                down.SetActive(false);
-                right.SetActive(false);
-                left.SetActive(true);
-            }
-
-            if (fAngle <= 315.0F && fAngle > 225.0F)
-            {
-                //print ("down");
-                clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
-                up.SetActive(false);
-                left.SetActive(false);
-                right.SetActive(false);
-                down.SetActive(true);
-            }
-        }
-        //Restoration spell (Revivify)
-        if (Input.GetMouseButtonDown(1) && spells == 1 && restoreCoolDown <= 0) //right click
-        {
-            au_heal.Play();
-            Rigidbody2D clone;
-            clone = Instantiate(restorationPrefab, transform.position, transform.rotation) as Rigidbody2D;
-            health += healthRestore;
-            if (health > maxHealth)
-                health = maxHealth;
-            restoreTimer = 3;
-            restoreCoolDown = 10.0f;
-        }
-
-        if (restoreTimer > 0)
-        {
-            restoreTimer -= 1 * Time.deltaTime;
-            //prevent player from moving
-            self.GetComponent<PlayerMovement>().moveSpeed = 0;
-            //self.GetComponent<PlayerMovement>().moveY = 0;
-        }
-        if (restoreCoolDown > 0)
-        {
-            restoreCoolDown -= 1 * Time.deltaTime;
-            calculator3 = restoreCoolDown / 10;
-            CoolDownRestore(calculator3);
-        }
-        if (restoreCoolDown < 0)
-            restoreCoolDown = 0;
-
-
-
-        //Cold Spell (StormShield)
-        if (Input.GetMouseButton(1) && spells == 2 && shieldCoolDown <= 0) //right click
-        {
-            shieldChild.SetActive(true);
-            shieldCoolDown = 50;
-            shieldTimer = 18;
-            armor += shield;
-
-            //prevent player from moving
-            self.GetComponent<PlayerMovement>().moveSpeed = 0;
-            //self.GetComponent<PlayerMovement>().moveY = 0;
-        }
-        //turning shield off
-        if (shieldChild.activeSelf && shieldTimer != 0 && shieldTimer < 1)
-        {
-            shieldTimer = 0;
-            shieldChild.SetActive(false);
-            armor -= shield;
-        }
-        //shield timer
-        if (shieldTimer >= 1)
-            shieldTimer -= 1 * Time.deltaTime;
-        if (shieldCoolDown > 0)
-        {
-            calculator2 = shieldCoolDown / 50;
-            CoolDownShield(calculator2);
-            shieldCoolDown -= 1 * Time.deltaTime;
-        }
-        if (shieldCoolDown < 0)
-            shieldCoolDown = 0;
-
-        //Spell 4 (Shock Wave)
-        if (Input.GetMouseButtonDown(1) && spells == 3 && lightCoolDown <= 0)  //right click
-        {
-
-            _mouse.Lightning();
-            lightCoolDown = 80;
-            au_light.Play();
-
-
-        }
-        if (lightCoolDown > 0)
-        {
-            calculator4 = lightCoolDown / 80;
-            CoolDownLight(calculator4);
-            lightCoolDown -= 1 * Time.deltaTime;
-        }
-        if (lightCoolDown < 0)
-            lightCoolDown = 0;
-
-
-
-
         //**directional combat**
 
         //facing right
@@ -603,25 +384,5 @@ public class CombatScript : MonoBehaviour
     public void SetEnergy(float myEnergy)
     {
         energyBar.transform.localScale = new Vector3(myEnergy, energyBar.transform.localScale.y, energyBar.transform.localScale.z);
-    }
-    //fire cooldown calculations
-    public void CoolDownFire(float Fire)
-    {
-        CoolDownImageFire.transform.localScale = new Vector3(CoolDownImageFire.transform.localScale.x, calculator4, CoolDownImageFire.transform.localScale.z);
-    }
-    //cooldown for restoration
-    public void CoolDownRestore(float Restorex)
-    {
-        CoolDownImageRestore.transform.localScale = new Vector3(CoolDownImageRestore.transform.localScale.x, calculator3, CoolDownImageRestore.transform.localScale.z);
-    }
-    //cooldown for shield
-    public void CoolDownShield(float Sheildx)
-    {
-        CoolDownImageShield.transform.localScale = new Vector3(CoolDownImageShield.transform.localScale.x, calculator2, CoolDownImageShield.transform.localScale.z);
-    }
-    //cooldown for shield
-    public void CoolDownLight(float Lightx)
-    {
-        CoolDownImageLight.transform.localScale = new Vector3(CoolDownImageLight.transform.localScale.x, calculator4, CoolDownImageLight.transform.localScale.z);
     }
 }

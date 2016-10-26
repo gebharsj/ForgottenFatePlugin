@@ -70,7 +70,7 @@ public class AiIntermediate : MonoBehaviour {
 
         targetPlayer = _player.transform;
 
-        targetRayCast = _player.transform.FindChild("Raycast");
+        targetRayCast = this.transform.FindChild("Raycast");
 
         _ownCollider = this.GetComponent<BoxCollider2D>();
 
