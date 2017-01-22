@@ -53,7 +53,7 @@ public class PlayerMovement : MonoBehaviour {
 
     void Update()
     {
-        if (Input.GetKey(PlayerPrefs.GetString("MoveRight")))
+        if (Input.GetKey(KeyCode.D))
         {
             transform.Translate(Vector3.right * moveSpeed * Time.deltaTime);
             moveRight = true;
@@ -61,7 +61,7 @@ public class PlayerMovement : MonoBehaviour {
             moveUp = false;
             moveDown = false;
         }
-        if (Input.GetKey(PlayerPrefs.GetString("MoveLeft")))
+        if (Input.GetKey(KeyCode.A))
         {
             transform.Translate(Vector3.left * moveSpeed * Time.deltaTime);
             moveRight = false;
@@ -69,7 +69,7 @@ public class PlayerMovement : MonoBehaviour {
             moveUp = false;
             moveDown = false;
         }
-        if (Input.GetKey(PlayerPrefs.GetString("MoveUp")))
+        if (Input.GetKey(KeyCode.W))
         {
             transform.Translate(Vector3.up * moveSpeed * Time.deltaTime);
             moveRight = false;
@@ -77,7 +77,7 @@ public class PlayerMovement : MonoBehaviour {
             moveUp = true;
             moveDown = false;
         }
-        if (Input.GetKey(PlayerPrefs.GetString("MoveDown")))
+        if (Input.GetKey(KeyCode.S))
         {
             transform.Translate(Vector3.down * moveSpeed * Time.deltaTime);
             moveRight = false;

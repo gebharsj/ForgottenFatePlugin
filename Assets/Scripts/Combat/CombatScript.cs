@@ -104,7 +104,7 @@ public class CombatScript : MonoBehaviour
         smokeChild = GameObject.FindGameObjectWithTag("Smoke");
 
         //============Grabs all the Visual Componenets from Combat Visuals========
-        CombatVisuals visuals = this.GetComponent<CombatVisuals>();
+        CombatVisuals visuals = GameObject.FindGameObjectWithTag("GameManager").GetComponent<CombatVisuals>();
 
         projectile = visuals.projectile;
         startColor = visuals.startColor;

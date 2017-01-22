@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
+using System.Collections.Generic;
 
 public class CombatVisuals : MonoBehaviour {
 
@@ -16,15 +16,32 @@ public class CombatVisuals : MonoBehaviour {
     public Transform restorationPrefab;
     public GameObject shieldChild;
 
-    //**image cooldowns**
-    public Image CoolDownImageShield;
-    public Image CoolDownImageRestore;
-    public Image CoolDownImageFire;
-    public Image CoolDownImageLight;
+    public GameObject baseUI;
+
+    GameObject spellsUI;
+
+    public List<GameObject> spellImages = new List<GameObject>();
+
+    void OnEnable()
+    {
+    }
+
+    public GameObject CreateSpellUI(Image UI)
+    {
+        GameObject canvas = GameObject.FindGameObjectWithTag("Canvas");
+        spellsUI = canvas.transform.FindChild("Spells").gameObject;
+        GameObject newUI = (GameObject) Instantiate(baseUI);
+        newUI.transform.parent = spellsUI.transform;
+        newUI.transform.localPosition = Vector3.zero;
+        newUI.transform.FindChild("Image").GetComponent<Image>().sprite = UI.sprite;
+
+        return newUI;
+    }
 
     // Use this for initialization
-    void Start () {
-	
+    void Start ()
+    {
+        
 	}
 	
 	// Update is called once per frame

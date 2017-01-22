@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
+using System.Collections.Generic;
 
 public class CombatSpells : MonoBehaviour {
 
     public MouseScript _mouse;
+
+    List<ProjectileSpell> proSpells = new List<ProjectileSpell>();
 
     //---------Directions----------
     GameObject up;
@@ -18,7 +20,9 @@ public class CombatSpells : MonoBehaviour {
     //========Projectile============
     public float fireDamage = 0.02f;
     public Rigidbody2D flamePrefab;
-    public AudioClip flame1;
+    bool canFire;
+    bool isGrabbed;
+    AudioClip projectileSFX;
 
     //=========Burst============
     Transform restorationPrefab;
@@ -30,11 +34,18 @@ public class CombatSpells : MonoBehaviour {
     public int healthRestore = 25;
     public AudioClip buffClip;
 
+    //=======idNums========
+    int projectileIdNum = -1;
+
     //========MaxCoolDowns=====
     int maxShieldCoolDown;
     int maxRestoreCoolDown;
-    int maxFireCoolDown;
+    int maxProjectileCoolDown;
     int maxLightCoolDown;
+
+    //========CurrCoolDown====
+    [HideInInspector]
+    public float currProjCoolDown;
 
     //**Spell Timers**
     float shieldTimer;
@@ -60,6 +71,8 @@ public class CombatSpells : MonoBehaviour {
 
         spellSounds = gameObject.AddComponent<AudioSource>();
 
+        proSpells = GameObject.FindGameObjectWithTag("GameManager").GetComponent<SpellCreator>().proSpells;
+
         //maxShieldCoolDown = shieldCoolDown;
         //maxFireCoolDown = fireCoolDown;
         //maxLightCoolDown = lightCoolDown;
@@ -70,106 +83,122 @@ public class CombatSpells : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-
+        foreach (ProjectileSpell spell in proSpells)
+        {
+            Image cooldown = spell.UI.transform.FindChild("Border").FindChild("Cooldown").GetComponent<Image>();
+            if (!spell.isUse && spell.currCooldown >= 0)
+            {
+                spell.currCooldown -= (int)(40 * Time.deltaTime);
+                CoolDown(spell.currCooldown / spell.cooldown, cooldown);
+            }
+        }
     }
 
-    public void projectileSpell(int projectileCoolDown, AudioClip projectileSound)
+    public void projectileSpell(int idNum)
     {
-        print("cool down is : " + projectileCoolDown);
-        if (Input.GetMouseButton(1) && projectileCoolDown < 100)  //right click
+        if (idNum != projectileIdNum)
         {
-            if (projectileCoolDown < 100)
-                projectileCoolDown +=  (int) (40 * Time.deltaTime);
-            //CoolDownFire(projectileCoolDown / 100);
+            maxProjectileCoolDown = (int) proSpells[idNum].cooldown;
+            currProjCoolDown = (int)proSpells[idNum].currCooldown;
+            projectileSFX = proSpells[idNum].sfx;
+            flamePrefab = proSpells[idNum].obj;
+            CoolDownImageFire = proSpells[idNum].UI.transform.FindChild("Border").FindChild("Cooldown").GetComponent<Image>();
+            projectileIdNum = idNum;
+        }
+        /*
+                if (!canFire)
+                {
+                    if (currProjCoolDown < (maxProjectileCoolDown / 2))
+                        canFire = true;
+                    else
+                    {
+                        currProjCoolDown -= (int)(40 * Time.deltaTime);
+                        CoolDown(currProjCoolDown / maxProjectileCoolDown, CoolDownImageFire);
+                    }
 
-            projectileTimer = maxFireCoolDown;
+                    return;
+                }  
+        */
 
-            //prevent player from moving
-            GetComponent<PlayerMovement>().moveSpeed = 0;
-
-            if (!target)
-                target = GameObject.FindWithTag("Mouse").transform;
-
-            Vector3 v3Pos;
-            float fAngle;
-
-            v3Pos = Camera.main.WorldToScreenPoint(target.transform.position);
-            v3Pos = Input.mousePosition - v3Pos;
-            fAngle = Mathf.Atan2(v3Pos.y, v3Pos.x) * Mathf.Rad2Deg;
-
-            Rigidbody2D clone;
-            clone = Instantiate(flamePrefab, transform.position, transform.rotation) as Rigidbody2D;
-
-            if (fAngle < 0.0f)
-                fAngle += 360.0f;
-
-            //playing the sound effect
-            if (!spellSounds.isPlaying)
+        if (Input.GetMouseButton(1))  //right click
+        {
+            if (currProjCoolDown < maxProjectileCoolDown)
             {
-                spellSounds.clip = projectileSound;
-                spellSounds.Play();
+                currProjCoolDown += (int)(80 * Time.deltaTime);
+                CoolDown(currProjCoolDown / maxProjectileCoolDown, CoolDownImageFire);
+
+                //prevent player from moving
+                GetComponent<PlayerMovement>().moveSpeed = 0;
+
+                if (!target)
+                    target = GameObject.FindWithTag("Mouse").transform;
+
+                Vector3 v3Pos;
+                float fAngle;
+
+                v3Pos = Camera.main.WorldToScreenPoint(target.transform.position);
+                v3Pos = Input.mousePosition - v3Pos;
+                fAngle = Mathf.Atan2(v3Pos.y, v3Pos.x) * Mathf.Rad2Deg;
+
+                Rigidbody2D clone;
+                clone = Instantiate(flamePrefab, transform.position, transform.rotation) as Rigidbody2D;
+
+                if (fAngle < 0.0f)
+                    fAngle += 360.0f;
+
+                //playing the sound effect
+                if (!spellSounds.isPlaying)
+                {
+                    spellSounds.clip = projectileSFX;
+                    spellSounds.Play();
+                }
+
+                //flame goes in the direction of the mouse
+                if (fAngle <= 135.0F && fAngle > 45.0F)
+                {
+                    //print ("up");
+                    clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
+                    down.SetActive(false);
+                    left.SetActive(false);
+                    right.SetActive(false);
+                    up.SetActive(true);
+                }
+
+                if (fAngle <= 45.0F || fAngle > 315.0F)
+                {
+                    //print ("right");
+                    clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
+                    up.SetActive(false);
+                    down.SetActive(false);
+                    left.SetActive(false);
+                    right.SetActive(true);
+                }
+
+                if (fAngle <= 225.0F && fAngle > 135.0F)
+                {
+                    //print ("left");
+                    clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
+                    up.SetActive(false);
+                    down.SetActive(false);
+                    right.SetActive(false);
+                    left.SetActive(true);
+                }
+
+                if (fAngle <= 315.0F && fAngle > 225.0F)
+                {
+                    //print ("down");
+                    clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
+                    up.SetActive(false);
+                    left.SetActive(false);
+                    right.SetActive(false);
+                    down.SetActive(true);
+                }
             }
-
-            //flame goes in the direction of the mouse
-            if (fAngle <= 135.0F && fAngle > 45.0F)
+            else
             {
-                //print ("up");
-                clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
-                down.SetActive(false);
-                left.SetActive(false);
-                right.SetActive(false);
-                up.SetActive(true);
-            }
-
-            if (fAngle <= 45.0F || fAngle > 315.0F)
-            {
-                //print ("right");
-                clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
-                up.SetActive(false);
-                down.SetActive(false);
-                left.SetActive(false);
-                right.SetActive(true);
-            }
-
-            if (fAngle <= 225.0F && fAngle > 135.0F)
-            {
-                //print ("left");
-                clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
-                up.SetActive(false);
-                down.SetActive(false);
-                right.SetActive(false);
-                left.SetActive(true);
-            }
-
-            if (fAngle <= 315.0F && fAngle > 225.0F)
-            {
-                //print ("down");
-                clone.velocity = (GameObject.Find("Mouse").transform.position - transform.position).normalized * Random.Range(7, 10);
-                up.SetActive(false);
-                left.SetActive(false);
-                right.SetActive(false);
-                down.SetActive(true);
+                //over the max limit
             }
         }
-
-        print("here");
-        //casting fire  (Firestorm)
-        if (projectileTimer > 0)
-            projectileTimer -= 5 * Time.deltaTime;
-
-        if (projectileTimer <= 0 && projectileCoolDown > 0)
-        {
-            projectileCoolDown -= (int)(10 * Time.deltaTime);
-            //CoolDownFire(projectileCoolDown / 100);
-        }
-        if (projectileCoolDown < 0)
-        {
-            projectileCoolDown = 0;
-            //CoolDownFire(projectileCoolDown / 100);
-        }
-
-        if (projectileTimer < 0)
-            projectileTimer = 0;
 
         if (!Input.GetMouseButton(1) && spellSounds.isPlaying)
         {
@@ -268,12 +297,14 @@ public class CombatSpells : MonoBehaviour {
             burstCoolDown = 0;
     }
 
-    /*
+    
     //fire cooldown calculations
-    public void CoolDownFire(float Fire)
+    public void CoolDown(float coolValue, Image coolImage)
     {
-        CoolDownImageFire.transform.localScale = new Vector3(CoolDownImageFire.transform.localScale.x, Fire, CoolDownImageFire.transform.localScale.z);
+        coolImage.transform.localScale = new Vector3(coolImage.transform.localScale.x, coolValue, coolImage.transform.localScale.z);
     }
+
+    /*
     //cooldown for restoration
     public void CoolDownRestore(float Restorex)
     {
